@@ -4,7 +4,7 @@ import { verifyAccess } from "../utils/jwt";
 export interface AuthRequest extends Request {
   user?: string; // user ID attached by auth middleware
 }
-
+ 
 export function isAuthenticated(
   req: AuthRequest,
   res: Response,
