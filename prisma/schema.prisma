@@ -4,12 +4,114 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+//generator client {
+//  provider = "prisma-client-js"
+//  output   = "../generated/prisma"
+//}
+
+//datasource db {
+//  provider = "postgresql"
+//  url      = env("DATABASE_URL")
+//}
+
+
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum UserRole {
+  ADMIN
+  ORGANIZER
+  PARTICIPANT
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String?  // nullable if you support OTP-only users
+  fullName      String
+  role          UserRole @default(PARTICIPANT)
+  phone         String?  @unique
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  eventsCreated Event[]  @relation("EventOrganizers")
+  participants  Participant[]
+
+  // Optional OTP & Refresh Tokens
+  otps          OtpCode[]
+  tokens        RefreshToken[]
+}
+
+model Event {
+  id             String        @id @default(cuid())
+  title          String
+  description    String
+  hosts          String[]      // names of hosts or org names
+  attachments    Attachment[]
+  totalSeats     Int?
+  confirmedCount Int            @default(0)
+  type           String        // "onsite" | "online" (could be enum)
+  venue          String?       // when onsite
+  joinLink       String?       // when online
+  startAt        DateTime
+  endAt          DateTime
+  contactInfo    String
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organizers     User[]        @relation("EventOrganizers")
+  participants   Participant[]
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  url       String
+  type      String   // "image" | "video" | etc
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Participant {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId]) // user can join once
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  userId    String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, code])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
