@@ -9,6 +9,7 @@ CREATE TABLE "public"."User" (
     "fullName" TEXT NOT NULL,
     "role" "public"."UserRole" NOT NULL DEFAULT 'PARTICIPANT',
     "phone" TEXT,
+    "profilePic" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

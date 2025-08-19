@@ -25,3 +25,17 @@ export function verifyAccess(token: string): JwtPayload {
 export function verifyRefresh(token: string): JwtPayload {
   return jwt.verify(token, ENV.REFRESH_SECRET) as JwtPayload;
 }
+
+/**
+ * Generate a password reset token (valid 10 minutes)
+ */
+export function issueResetToken(userId: string): string {
+  return jwt.sign({ sub: userId }, ENV.RESET_SECRET, { expiresIn: "10m" });
+}
+
+/**
+ * Verify a password reset token
+ */
+export function verifyResetToken(token: string): JwtPayload {
+  return jwt.verify(token, ENV.RESET_SECRET) as JwtPayload;
+}

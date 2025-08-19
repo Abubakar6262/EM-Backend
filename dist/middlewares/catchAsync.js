@@ -1,14 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class ErrorHandler extends Error {
-    constructor(message, statusCode) {
-        super(message);
-        this.statusCode = statusCode;
-        Object.setPrototypeOf(this, new.target.prototype);
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, this.constructor);
-        }
-    }
-}
-exports.default = ErrorHandler;
+const catchAsync = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+exports.default = catchAsync;
 //# sourceMappingURL=catchAsync.js.map

@@ -35,7 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const AuthController = __importStar(require("../controllers/auth.controller"));
-const isAuthenticated_1 = require("../utils/isAuthenticated");
+const isAuthenticated_1 = require("../middlewares/isAuthenticated");
 const router = (0, express_1.Router)();
 // test auth api route
 router.get("/", (_req, res) => {
@@ -49,5 +49,9 @@ router.post("/login", AuthController.login);
 router.get("/refresh", AuthController.refreshToken);
 // user logout route
 router.get("/logout", isAuthenticated_1.isAuthenticated, AuthController.logout);
+// forgot password route
+router.post("/forgot-password", AuthController.forgotPassword);
+// verify reset token route
+router.post("/verify-reset", AuthController.verifyReset);
 exports.default = router;
 //# sourceMappingURL=auth.routes.js.map

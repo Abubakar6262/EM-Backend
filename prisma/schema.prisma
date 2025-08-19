@@ -37,6 +37,7 @@ model User {
   fullName      String
   role          UserRole @default(PARTICIPANT)
   phone         String?  @unique
+  profilePic    String?
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

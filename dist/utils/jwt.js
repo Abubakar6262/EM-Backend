@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.issueTokens = issueTokens;
 exports.verifyAccess = verifyAccess;
 exports.verifyRefresh = verifyRefresh;
+exports.issueResetToken = issueResetToken;
+exports.verifyResetToken = verifyResetToken;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const env_1 = require("../config/env");
 async function issueTokens(userId) {
@@ -25,5 +27,17 @@ function verifyAccess(token) {
 }
 function verifyRefresh(token) {
     return jsonwebtoken_1.default.verify(token, env_1.ENV.REFRESH_SECRET);
+}
+/**
+ * Generate a password reset token (valid 10 minutes)
+ */
+function issueResetToken(userId) {
+    return jsonwebtoken_1.default.sign({ sub: userId }, env_1.ENV.RESET_SECRET, { expiresIn: "10m" });
+}
+/**
+ * Verify a password reset token
+ */
+function verifyResetToken(token) {
+    return jsonwebtoken_1.default.verify(token, env_1.ENV.RESET_SECRET);
 }
 //# sourceMappingURL=jwt.js.map

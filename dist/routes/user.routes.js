@@ -35,7 +35,9 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const UserController = __importStar(require("../controllers/user.controllers"));
-const isAuthenticated_1 = require("../utils/isAuthenticated");
+const isAuthenticated_1 = require("../middlewares/isAuthenticated");
+const uploadToCloudinary_1 = require("../utils/uploadToCloudinary");
+const isAuthorized_1 = require("../middlewares/isAuthorized");
 const router = (0, express_1.Router)();
 // test user api route
 router.get("/", (_req, res) => {
@@ -43,7 +45,15 @@ router.get("/", (_req, res) => {
 });
 // get current user route
 router.get("/me", isAuthenticated_1.isAuthenticated, UserController.getMe);
+// get all users route
+router.get("/all", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ORGANIZER"]), UserController.getAllUsers);
+// update user role
+router.put("/update-user-role", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ORGANIZER"]), UserController.updateUserRole);
 // Update userInfo
 router.put("/update-user-info", isAuthenticated_1.isAuthenticated, UserController.updateUserInfo);
+// Update user profile pic
+router.put("/update-profile-pic", isAuthenticated_1.isAuthenticated, uploadToCloudinary_1.upload.single("profilePic"), UserController.updateProfilePic);
+// update user password
+router.put("/update-password", isAuthenticated_1.isAuthenticated, UserController.updatePassword);
 exports.default = router;
 //# sourceMappingURL=user.routes.js.map

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as AuthController from "../controllers/auth.controller";
-import { isAuthenticated } from "../utils/isAuthenticated";
+import { isAuthenticated } from "../middlewares/isAuthenticated";
 
 const router = Router();
 
@@ -21,5 +21,10 @@ router.get("/refresh", AuthController.refreshToken);
 // user logout route
 router.get("/logout", isAuthenticated,AuthController.logout);
 
+// forgot password route
+router.post("/forgot-password", AuthController.forgotPassword);
+
+// verify reset token route
+router.post("/verify-reset", AuthController.verifyReset);
 
 export default router;
