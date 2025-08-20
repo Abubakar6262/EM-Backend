@@ -13,8 +13,10 @@ const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
     params: async (req, file) => {
         return {
             folder: req.body.folder || "Event_Management/User_Profile_Pics",
-            format: file.mimetype.split("/")[1], // keep original format (jpg/png)
-            public_id: `${Date.now()}-${file.originalname.split(".")[0]}`, // unique file name
+            format: file.mimetype.split("/")[1],
+            public_id: `${Date.now()}-${file.originalname
+                .split(".")[0]
+                .replace(/[^a-zA-Z0-9-_]/g, "_")}`,
         };
     },
 });

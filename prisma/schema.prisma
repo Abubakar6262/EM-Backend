@@ -14,7 +14,6 @@
 //  url      = env("DATABASE_URL")
 //}
 
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -24,73 +23,108 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ------------------------------
+// Enums
+// ------------------------------
 enum UserRole {
-  ADMIN
   ORGANIZER
   PARTICIPANT
 }
 
+enum EventType {
+  ONSITE
+  ONLINE
+}
+
+enum JoinStatus {
+  PENDING // Waiting for organizer approval
+  APPROVED // Approved, confirmed seat
+  REJECTED // Rejected, cannot join
+}
+
+// ------------------------------
+// Models
+// ------------------------------
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String?  // nullable if you support OTP-only users
-  fullName      String
-  role          UserRole @default(PARTICIPANT)
-  phone         String?  @unique
-  profilePic    String?
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  fullName     String
+  role         UserRole @default(PARTICIPANT)
+  phone        String?  @unique
+  profilePic   String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  eventsCreated Event[]  @relation("EventOrganizers")
+  // Relations
+  eventsCreated Event[]        @relation("EventOrganizers")
   participants  Participant[]
-
-  // Optional OTP & Refresh Tokens
+  hostedEvents  Host[]         @relation("UserHosts")
   otps          OtpCode[]
   tokens        RefreshToken[]
 }
 
 model Event {
-  id             String        @id @default(cuid())
+  id             String    @id @default(cuid())
   title          String
   description    String
-  hosts          String[]      // names of hosts or org names
-  attachments    Attachment[]
   totalSeats     Int?
-  confirmedCount Int            @default(0)
-  type           String        // "onsite" | "online" (could be enum)
-  venue          String?       // when onsite
-  joinLink       String?       // when online
+  confirmedCount Int       @default(0) // Keep in sync in services
+  type           EventType
+  venue          String?
+  joinLink       String?
+  thumbnail      String
+  contactInfo    String
   startAt        DateTime
   endAt          DateTime
-  contactInfo    String
+  isDeleted      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  // Relations
+  organizers   User[]        @relation("EventOrganizers")
+  participants Participant[]
+  attachments  Attachment[]
+  hosts        Host[]        @relation("EventHosts")
+}
 
-  organizers     User[]        @relation("EventOrganizers")
-  participants   Participant[]
+model Host {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?  @unique
+  phone     String?  @unique
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Optional link to User if host is also a registered user
+  userId String?
+  user   User?   @relation("UserHosts", fields: [userId], references: [id])
+
+  // Relations
+  events Event[] @relation("EventHosts")
 }
 
 model Attachment {
   id        String   @id @default(cuid())
   url       String
-  type      String   // "image" | "video" | etc
+  type      String // e.g. "image" | "video" | etc
   eventId   String
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
 
 model Participant {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   userId    String
   eventId   String
-  createdAt DateTime @default(now())
+  status    JoinStatus @default(PENDING) // Approval status
+  createdAt DateTime   @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, eventId]) // user can join once
+  @@unique([userId, eventId]) // user can request/join once
 }
 
 model OtpCode {
@@ -100,19 +134,18 @@ model OtpCode {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, code])
 }
 
 model RefreshToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  token     String   @unique
+  token     String    @unique
   expiresAt DateTime
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   revokedAt DateTime?
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-

@@ -15,28 +15,37 @@ router.post(
   "/create",
   isAuthenticated,
   isAuthorized(["ORGANIZER"]),
-  upload.array("media", 10),
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 }, // required
+    { name: "media", maxCount: 10 }, // optional
+  ]),
   EventControllers.createEvent
 );
 
 // get all events route
-router.get("/all", (_req, res) => {
-  res.send("List of all events");
-});
+router.get("/all", EventControllers.getAllEvents);
 
 // get event by id route
-router.get("/:id", (_req, res) => {
-  res.send("Event details");
-});
+router.get("/:id", EventControllers.getEventById);
 
 // update event route
-router.put("/:id", (_req, res) => {
-  res.send("Event updated successfully");
-});
+router.put(
+  "/update/:id",
+  isAuthenticated,
+  isAuthorized(["ORGANIZER"]),
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 }, // optional
+    { name: "media", maxCount: 10 }, // optional
+  ]),
+  EventControllers.updateEventById
+);
 
 // delete event route
-router.delete("/:id", (_req, res) => {
-  res.send("Event deleted successfully");
-});
+router.delete(
+  "/delete/:id",
+  isAuthenticated,
+  isAuthorized(["ORGANIZER"]),
+  EventControllers.deleteEventById
+);
 
 export default router;

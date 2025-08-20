@@ -6,6 +6,7 @@ import { AuthRequest } from "../middlewares/isAuthenticated";
 import catchAsync from "../middlewares/catchAsync";
 import bcrypt from "bcryptjs";
 import { updatePasswordSchema } from "../validators/auth.schema";
+import { deleteImageFromCloudinary } from "../utils/deleteImageFromCloudinary";
 
 // get current user information
 export const getMe = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -83,13 +84,25 @@ export const updateProfilePic = catchAsync(
 
     if (!req.file) throw new ErrorHandler("No file uploaded", 400);
 
-    const imageUrl = req.file.path;
+    const newImageUrl = req.file.path;
 
+    // Get old profile picture before updating
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { profilePic: true },
+    });
+
+    // Update with new profile picture
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { profilePic: imageUrl },
+      data: { profilePic: newImageUrl },
       select: { id: true, email: true, fullName: true, profilePic: true },
     });
+
+    // Delete old profile picture if exists
+    if (user?.profilePic) {
+      await deleteImageFromCloudinary(user.profilePic);
+    }
 
     res.status(200).json({
       success: true,
@@ -98,6 +111,7 @@ export const updateProfilePic = catchAsync(
     });
   }
 );
+
 
 // update user role
 export const updateUserRole = catchAsync(
