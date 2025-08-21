@@ -127,14 +127,23 @@ exports.getMyEvents = (0, catchAsync_1.default)(async (req, res) => {
     if (!userId) {
         throw new ErrorHandler_1.default("Unauthorized", 401);
     }
-    const events = await (0, event_service_1.getMyEventsService)(userId);
+    const { page = "1", limit = "10", filterBy, search } = req.query;
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(limit, 10) || 10;
+    const { events, total } = await (0, event_service_1.getMyEventsService)(userId, pageNum, limitNum, filterBy, search);
     if (!events || events.length === 0) {
         throw new ErrorHandler_1.default("No events found for this user", 404);
     }
     res.status(200).json({
         success: true,
-        message: "User events fetched successfully",
+        message: "Your events fetched successfully",
         count: events.length,
+        pagination: {
+            total,
+            page: pageNum,
+            limit: limitNum,
+            totalPages: Math.ceil(total / limitNum),
+        },
         data: events,
     });
 });
