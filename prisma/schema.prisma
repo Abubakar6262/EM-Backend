@@ -36,6 +36,14 @@ enum EventType {
   ONLINE
 }
 
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
 enum JoinStatus {
   PENDING // Waiting for organizer approval
   APPROVED // Approved, confirmed seat
@@ -63,6 +71,7 @@ model User {
   hostedEvents  Host[]         @relation("UserHosts")
   otps          OtpCode[]
   tokens        RefreshToken[]
+  favoriteEvents Event[]       @relation("UserFavorites")
 }
 
 model Event {
@@ -78,6 +87,7 @@ model Event {
   contactInfo    String
   startAt        DateTime
   endAt          DateTime
+  status         EventStatus @default(PUBLISHED)
   isDeleted      Boolean   @default(false)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -87,6 +97,7 @@ model Event {
   participants Participant[]
   attachments  Attachment[]
   hosts        Host[]        @relation("EventHosts")
+  favoredBy    User[]        @relation("UserFavorites")
 }
 
 model Host {

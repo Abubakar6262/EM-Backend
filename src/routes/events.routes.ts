@@ -24,6 +24,13 @@ router.post(
 
 // get all events route
 router.get("/all", EventControllers.getAllEvents);
+// get my events route
+router.get(
+  "/my-events",
+  isAuthenticated,
+  isAuthorized(["ORGANIZER"]),
+  EventControllers.getMyEvents
+);
 
 // get event by id route
 router.get("/:id", EventControllers.getEventById);
@@ -47,5 +54,15 @@ router.delete(
   isAuthorized(["ORGANIZER"]),
   EventControllers.deleteEventById
 );
+// delete Attachment route
+router.delete(
+  "/delete-attachment/:id",
+  isAuthenticated,
+  isAuthorized(["ORGANIZER"]),
+  EventControllers.deleteAttachmentById
+);
+
+
+
 
 export default router;

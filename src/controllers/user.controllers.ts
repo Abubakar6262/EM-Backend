@@ -1,12 +1,17 @@
 import { Response } from "express";
-import { prisma } from "../services/prisma";
 import ErrorHandler from "../utils/ErrorHandler";
 import { updateUserSchema } from "../validators/user.schema";
 import { AuthRequest } from "../middlewares/isAuthenticated";
 import catchAsync from "../middlewares/catchAsync";
-import bcrypt from "bcryptjs";
 import { updatePasswordSchema } from "../validators/auth.schema";
-import { deleteImageFromCloudinary } from "../utils/deleteImageFromCloudinary";
+import {
+  getAllUsersService,
+  getMeService,
+  updatePasswordService,
+  updateProfilePicService,
+  updateUserInfoService,
+  updateUserRoleService,
+} from "../services/user.services";
 
 // get current user information
 export const getMe = catchAsync(async (req: AuthRequest, res: Response) => {
@@ -16,16 +21,9 @@ export const getMe = catchAsync(async (req: AuthRequest, res: Response) => {
     throw new ErrorHandler("Unauthorized", 401);
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true, email: true, fullName: true, role: true },
-  });
+  const user = await getMeService(userId);
 
-  if (!user) {
-    throw new ErrorHandler("User not found", 404);
-  }
-
-  res.json({
+  res.status(200).json({
     success: true,
     user,
   });
@@ -34,13 +32,24 @@ export const getMe = catchAsync(async (req: AuthRequest, res: Response) => {
 // get all users
 export const getAllUsers = catchAsync(
   async (req: AuthRequest, res: Response) => {
-    const users = await prisma.user.findMany({
-      select: { id: true, email: true, fullName: true, role: true },
-    });
+    const { page = "1", limit = "10", search } = req.query;
+    const userId = req.user;
+    if (!userId) {
+      throw new ErrorHandler("Unauthorized", 401);
+    }
+
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = parseInt(limit as string, 10) || 10;
+
+    const result = await getAllUsersService(
+      pageNum,
+      limitNum,
+      search as string
+    );
 
     res.json({
       success: true,
-      users,
+      ...result, // includes users, totalUsers, totalPages, currentPage
     });
   }
 );
@@ -56,23 +65,12 @@ export const updateUserInfo = catchAsync(
     // Validate input with Zod
     const { fullName, phone } = updateUserSchema.parse(req.body);
 
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: { fullName, phone },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        phone: true,
-        role: true,
-      },
+    const user = await updateUserInfoService(userId, fullName, phone as string);
+
+    res.status(200).json({
+      success: true,
+      user,
     });
-
-    if (!user) {
-      throw new ErrorHandler("User not found", 404);
-    }
-
-    res.json({ success: true, user });
   }
 );
 
@@ -86,23 +84,7 @@ export const updateProfilePic = catchAsync(
 
     const newImageUrl = req.file.path;
 
-    // Get old profile picture before updating
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { profilePic: true },
-    });
-
-    // Update with new profile picture
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: { profilePic: newImageUrl },
-      select: { id: true, email: true, fullName: true, profilePic: true },
-    });
-
-    // Delete old profile picture if exists
-    if (user?.profilePic) {
-      await deleteImageFromCloudinary(user.profilePic);
-    }
+    const updatedUser = await updateProfilePicService(userId, newImageUrl);
 
     res.status(200).json({
       success: true,
@@ -111,7 +93,6 @@ export const updateProfilePic = catchAsync(
     });
   }
 );
-
 
 // update user role
 export const updateUserRole = catchAsync(
@@ -122,19 +103,7 @@ export const updateUserRole = catchAsync(
       throw new ErrorHandler("Role and User are required in body", 400);
     }
 
-    // Update user role
-    const updatedUser = await prisma.user.update({
-      where: { id: user.id },
-      data: { role },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-      },
-    });
-
-    if (!updatedUser) throw new ErrorHandler("User not found", 404);
+    const updatedUser = await updateUserRoleService(user.id, role);
 
     res.status(200).json({
       success: true,
@@ -148,41 +117,14 @@ export const updateUserRole = catchAsync(
 export const updatePassword = catchAsync(
   async (req: AuthRequest, res: Response) => {
     const userId = req.user;
+    if (!userId) throw new ErrorHandler("Unauthorized", 401);
 
-    // Validate request body with Zod
+    // Validate input
     const parsed = updatePasswordSchema.parse(req.body);
     const { newPassword } = parsed;
     const { oldPassword } = req.body;
 
-    if (!userId) {
-      throw new ErrorHandler("Unauthorized", 401);
-    }
-
-    // Get user from DB
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new ErrorHandler("User not found", 404);
-    }
-
-    if (!user.passwordHash) {
-      throw new ErrorHandler("User has no password set", 400);
-    }
-
-    // Compare old password
-    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!isMatch) {
-      throw new ErrorHandler("Old password is incorrect", 400);
-    }
-
-    // Hash and update new password
-    const newPasswordHash = await bcrypt.hash(newPassword, 10);
-    await prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash: newPasswordHash },
-    });
+    await updatePasswordService(userId, oldPassword, newPassword);
 
     res.status(200).json({
       success: true,

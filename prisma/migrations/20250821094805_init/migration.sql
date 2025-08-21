@@ -5,6 +5,9 @@ CREATE TYPE "public"."UserRole" AS ENUM ('ORGANIZER', 'PARTICIPANT');
 CREATE TYPE "public"."EventType" AS ENUM ('ONSITE', 'ONLINE');
 
 -- CreateEnum
+CREATE TYPE "public"."EventStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ONGOING', 'COMPLETED', 'CANCELLED');
+
+-- CreateEnum
 CREATE TYPE "public"."JoinStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- CreateTable
@@ -37,6 +40,7 @@ CREATE TABLE "public"."Event" (
     "contactInfo" TEXT NOT NULL,
     "startAt" TIMESTAMP(3) NOT NULL,
     "endAt" TIMESTAMP(3) NOT NULL,
+    "status" "public"."EventStatus" NOT NULL DEFAULT 'PUBLISHED',
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -118,6 +122,14 @@ CREATE TABLE "public"."_EventHosts" (
     CONSTRAINT "_EventHosts_AB_pkey" PRIMARY KEY ("A","B")
 );
 
+-- CreateTable
+CREATE TABLE "public"."_UserFavorites" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+
+    CONSTRAINT "_UserFavorites_AB_pkey" PRIMARY KEY ("A","B")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
 
@@ -144,6 +156,9 @@ CREATE INDEX "_EventOrganizers_B_index" ON "public"."_EventOrganizers"("B");
 
 -- CreateIndex
 CREATE INDEX "_EventHosts_B_index" ON "public"."_EventHosts"("B");
+
+-- CreateIndex
+CREATE INDEX "_UserFavorites_B_index" ON "public"."_UserFavorites"("B");
 
 -- AddForeignKey
 ALTER TABLE "public"."Host" ADD CONSTRAINT "Host_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -174,3 +189,9 @@ ALTER TABLE "public"."_EventHosts" ADD CONSTRAINT "_EventHosts_A_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "public"."_EventHosts" ADD CONSTRAINT "_EventHosts_B_fkey" FOREIGN KEY ("B") REFERENCES "public"."Host"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."_UserFavorites" ADD CONSTRAINT "_UserFavorites_A_fkey" FOREIGN KEY ("A") REFERENCES "public"."Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."_UserFavorites" ADD CONSTRAINT "_UserFavorites_B_fkey" FOREIGN KEY ("B") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

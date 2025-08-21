@@ -49,20 +49,19 @@ router.post("/create", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isA
     { name: "media", maxCount: 10 }, // optional
 ]), EventControllers.createEvent);
 // get all events route
-router.get("/all", (_req, res) => {
-    res.send("List of all events");
-});
+router.get("/all", EventControllers.getAllEvents);
+// get my events route
+router.get("/my-events", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ORGANIZER"]), EventControllers.getMyEvents);
 // get event by id route
-router.get("/:id", (_req, res) => {
-    res.send("Event details");
-});
+router.get("/:id", EventControllers.getEventById);
 // update event route
-router.put("/:id", (_req, res) => {
-    res.send("Event updated successfully");
-});
+router.put("/update/:id", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ORGANIZER"]), uploadToCloudinary_1.upload.fields([
+    { name: "thumbnail", maxCount: 1 }, // optional
+    { name: "media", maxCount: 10 }, // optional
+]), EventControllers.updateEventById);
 // delete event route
-router.delete("/:id", (_req, res) => {
-    res.send("Event deleted successfully");
-});
+router.delete("/delete/:id", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ORGANIZER"]), EventControllers.deleteEventById);
+// delete Attachment route
+router.delete("/delete-attachment/:id", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ORGANIZER"]), EventControllers.deleteAttachmentById);
 exports.default = router;
 //# sourceMappingURL=events.routes.js.map
