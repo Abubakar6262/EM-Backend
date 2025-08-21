@@ -10,6 +10,7 @@ const user_schema_1 = require("../validators/user.schema");
 const catchAsync_1 = __importDefault(require("../middlewares/catchAsync"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const auth_schema_1 = require("../validators/auth.schema");
+const deleteImageFromCloudinary_1 = require("../utils/deleteImageFromCloudinary");
 // get current user information
 exports.getMe = (0, catchAsync_1.default)(async (req, res) => {
     const userId = req.user; // from authMiddleware
@@ -69,12 +70,22 @@ exports.updateProfilePic = (0, catchAsync_1.default)(async (req, res) => {
         throw new ErrorHandler_1.default("Unauthorized", 401);
     if (!req.file)
         throw new ErrorHandler_1.default("No file uploaded", 400);
-    const imageUrl = req.file.path;
+    const newImageUrl = req.file.path;
+    // Get old profile picture before updating
+    const user = await prisma_1.prisma.user.findUnique({
+        where: { id: userId },
+        select: { profilePic: true },
+    });
+    // Update with new profile picture
     const updatedUser = await prisma_1.prisma.user.update({
         where: { id: userId },
-        data: { profilePic: imageUrl },
+        data: { profilePic: newImageUrl },
         select: { id: true, email: true, fullName: true, profilePic: true },
     });
+    // Delete old profile picture if exists
+    if (user?.profilePic) {
+        await (0, deleteImageFromCloudinary_1.deleteImageFromCloudinary)(user.profilePic);
+    }
     res.status(200).json({
         success: true,
         message: "Profile picture updated successfully",
