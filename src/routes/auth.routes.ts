@@ -1,0 +1,30 @@
+import { Router } from "express";
+import * as AuthController from "../controllers/auth.controller";
+import { isAuthenticated } from "../middlewares/isAuthenticated";
+
+const router = Router();
+
+// test auth api route
+router.get("/", (_req, res) => {
+  res.send("Auth API Running Successfully");
+});
+
+//user signup route 
+router.post("/signup", AuthController.signup);
+
+// user login route
+router.post("/login", AuthController.login);
+
+// token refresh route
+router.get("/refresh", AuthController.refreshToken);
+
+// user logout route
+router.get("/logout", isAuthenticated,AuthController.logout);
+
+// forgot password route
+router.post("/forgot-password", AuthController.forgotPassword);
+
+// verify reset token route
+router.post("/verify-reset", AuthController.verifyReset);
+
+export default router;
