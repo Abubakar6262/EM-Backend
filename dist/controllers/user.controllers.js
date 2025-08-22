@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePassword = exports.updateUserRole = exports.updateProfilePic = exports.updateUserInfo = exports.getAllUsers = exports.getMe = void 0;
+exports.deleteUser = exports.updatePassword = exports.updateUserRole = exports.updateProfilePic = exports.updateUserInfo = exports.getAllUsers = exports.getMe = void 0;
 const ErrorHandler_1 = __importDefault(require("../utils/ErrorHandler"));
 const user_schema_1 = require("../validators/user.schema");
 const catchAsync_1 = __importDefault(require("../middlewares/catchAsync"));
@@ -91,6 +91,22 @@ exports.updatePassword = (0, catchAsync_1.default)(async (req, res) => {
     res.status(200).json({
         success: true,
         message: "Password updated successfully",
+    });
+});
+// Delete user controller
+exports.deleteUser = (0, catchAsync_1.default)(async (req, res) => {
+    const userId = req.params.id;
+    const checkRequest = req.user;
+    if (!checkRequest) {
+        throw new ErrorHandler_1.default("Unauthorized", 401);
+    }
+    if (!userId) {
+        throw new ErrorHandler_1.default("User ID is required", 400);
+    }
+    await (0, user_services_1.deleteUserService)(userId);
+    res.status(200).json({
+        success: true,
+        message: "User deleted successfully",
     });
 });
 //# sourceMappingURL=user.controllers.js.map

@@ -16,10 +16,20 @@ router.get("/", (_req, res) => {
 router.get("/me", isAuthenticated, UserController.getMe);
 
 // get all users route
-router.get("/all", isAuthenticated, isAuthorized(["ORGANIZER"]), UserController.getAllUsers);
+router.get(
+  "/all",
+  isAuthenticated,
+  isAuthorized(["ADMIN"]),
+  UserController.getAllUsers
+);
 
 // update user role
-router.put("/update-user-role", isAuthenticated, isAuthorized(["ORGANIZER"]), UserController.updateUserRole);
+router.put(
+  "/update-user-role",
+  isAuthenticated,
+  isAuthorized(["ADMIN"]),
+  UserController.updateUserRole
+);
 
 // Update userInfo
 router.put("/update-user-info", isAuthenticated, UserController.updateUserInfo);
@@ -29,4 +39,8 @@ router.put("/update-profile-pic", isAuthenticated, upload.single("profilePic"), 
 
 // update user password
 router.put("/update-password", isAuthenticated, UserController.updatePassword);
+
+// delete user
+router.delete("/delete-user/:id", isAuthenticated, isAuthorized(["ADMIN"]), UserController.deleteUser);
+
 export default router;

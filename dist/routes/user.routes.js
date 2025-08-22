@@ -46,14 +46,16 @@ router.get("/", (_req, res) => {
 // get current user route
 router.get("/me", isAuthenticated_1.isAuthenticated, UserController.getMe);
 // get all users route
-router.get("/all", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ORGANIZER"]), UserController.getAllUsers);
+router.get("/all", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ADMIN"]), UserController.getAllUsers);
 // update user role
-router.put("/update-user-role", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ORGANIZER"]), UserController.updateUserRole);
+router.put("/update-user-role", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ADMIN"]), UserController.updateUserRole);
 // Update userInfo
 router.put("/update-user-info", isAuthenticated_1.isAuthenticated, UserController.updateUserInfo);
 // Update user profile pic
 router.put("/update-profile-pic", isAuthenticated_1.isAuthenticated, uploadToCloudinary_1.upload.single("profilePic"), UserController.updateProfilePic);
 // update user password
 router.put("/update-password", isAuthenticated_1.isAuthenticated, UserController.updatePassword);
+// delete user
+router.delete("/delete-user/:id", isAuthenticated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)(["ADMIN"]), UserController.deleteUser);
 exports.default = router;
 //# sourceMappingURL=user.routes.js.map
