@@ -161,3 +161,11 @@ export const updatePasswordService = async (
 
   return true; // just success flag
 };
+
+//  Delete user service
+export const deleteUserService = async (userId: string) => {
+  const user = await prisma.user.delete({
+    where: { id: userId },
+  });
+  return user;
+};

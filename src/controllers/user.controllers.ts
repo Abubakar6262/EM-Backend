@@ -5,6 +5,7 @@ import { AuthRequest } from "../middlewares/isAuthenticated";
 import catchAsync from "../middlewares/catchAsync";
 import { updatePasswordSchema } from "../validators/auth.schema";
 import {
+  deleteUserService,
   getAllUsersService,
   getMeService,
   updatePasswordService,
@@ -129,6 +130,30 @@ export const updatePassword = catchAsync(
     res.status(200).json({
       success: true,
       message: "Password updated successfully",
+    });
+  }
+);
+
+// Delete user controller
+export const deleteUser = catchAsync(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.params.id;
+
+    const checkRequest = req.user;
+
+    if (!checkRequest) {
+      throw new ErrorHandler("Unauthorized", 401);
+    }
+    
+    if (!userId) {
+      throw new ErrorHandler("User ID is required", 400);
+    }
+
+    await deleteUserService(userId);
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
     });
   }
 );
