@@ -23,4 +23,17 @@ router.put(
   participantController.updateParticipantStatus
 );
 
+router.delete("/:participantId", isAuthenticated, isAuthorized(["PARTICIPANT"]), participantController.cancelParticipantRequest);
+
+//  Get my app participants Request
+router.get("/my-requests", isAuthenticated, isAuthorized(["PARTICIPANT"]), participantController.getMyParticipants);
+
+router.get(
+  "/related/organizer",
+  isAuthenticated,
+  isAuthorized(["ORGANIZER"]),
+  participantController.getParticipantsForOrganizer
+);
+
+
 export default router;

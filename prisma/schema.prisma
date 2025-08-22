@@ -27,7 +27,8 @@ datasource db {
 // Enums
 // ------------------------------
 enum UserRole {
-  ORGANIZER
+  ADMIN
+  ORGANIZER 
   PARTICIPANT
 }
 
