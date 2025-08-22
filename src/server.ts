@@ -31,8 +31,8 @@ app.use("/api", routes);
 app.use(ErrorMiddleware);
 
 // Start server
-app.listen(ENV.PORT, () => {
-  console.log(` Server running at http://localhost:${ENV.PORT}`);
-});
+// app.listen(ENV.PORT, () => {
+//   console.log(` Server running at http://localhost:${ENV.PORT}`);
+// });
 
 export default app;
