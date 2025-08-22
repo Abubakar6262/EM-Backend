@@ -238,30 +238,56 @@ const deleteEventByIdService = async (eventId, userId) => {
 };
 exports.deleteEventByIdService = deleteEventByIdService;
 // Get my Events
-const getMyEventsService = async (userId) => {
-    const events = await prisma_1.prisma.event.findMany({
-        where: {
-            isDeleted: false,
-            organizers: {
-                some: { id: userId }, // only events created by this user
+const getMyEventsService = async (userId, page, limit, filterBy, search) => {
+    const now = new Date();
+    let where = {
+        isDeleted: false,
+        organizers: { some: { id: userId } },
+    };
+    let orderBy = { startAt: "asc" };
+    // 🔹 Apply filter
+    switch (filterBy?.toLowerCase()) {
+        case "incoming":
+            where = { ...where, startAt: { gt: now } };
+            orderBy = { startAt: "asc" };
+            break;
+        case "past":
+            where = { ...where, endAt: { lt: now } };
+            orderBy = { startAt: "desc" };
+            break;
+        case "live":
+            where = { ...where, startAt: { lte: now }, endAt: { gte: now } };
+            orderBy = { endAt: "asc" };
+            break;
+    }
+    // 🔹 Apply search by title
+    if (search) {
+        where = {
+            ...where,
+            title: {
+                contains: search,
+                mode: "insensitive",
             },
-        },
-        include: {
-            hosts: true,
-            organizers: {
-                select: {
-                    id: true,
-                    fullName: true,
-                    email: true,
+        };
+    }
+    const skip = (page - 1) * limit;
+    const [events, total] = await Promise.all([
+        prisma_1.prisma.event.findMany({
+            where,
+            skip,
+            take: limit,
+            include: {
+                hosts: true,
+                organizers: {
+                    select: { id: true, fullName: true, email: true },
                 },
+                attachments: true,
             },
-            attachments: true,
-        },
-        orderBy: {
-            startAt: "asc",
-        },
-    });
-    return events;
+            orderBy,
+        }),
+        prisma_1.prisma.event.count({ where }),
+    ]);
+    return { events, total };
 };
 exports.getMyEventsService = getMyEventsService;
 // Delete attachment

@@ -31,3 +31,4 @@ export const updatePasswordSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[\W_]/, "Password must contain at least one special character"),
 });
+
