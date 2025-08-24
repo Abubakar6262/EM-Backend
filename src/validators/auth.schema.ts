@@ -5,7 +5,7 @@ export const signupSchema = z.object({
   email: z.string().email("Invalid email format"),
 
   fullName: z.string().min(3, "Full name must be at least 3 characters long"),
-
+  role: z.enum(["ADMIN", "ORGANIZER", "PARTICIPANT"]).optional(),
   password: z
     .string()
     .min(6, "Password must be at least 6 characters long")
@@ -31,4 +31,3 @@ export const updatePasswordSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[\W_]/, "Password must contain at least one special character"),
 });
-
