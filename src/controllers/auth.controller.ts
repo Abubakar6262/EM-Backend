@@ -57,14 +57,14 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   res
     .cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: ENV.NODE_ENV === "production",
+      sameSite: ENV.NODE_ENV === "production" ? "strict" : "lax",
       maxAge: 15 * 60 * 1000, // 15 min
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: ENV.NODE_ENV === "production",
+      sameSite: ENV.NODE_ENV === "production" ? "strict" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     })
     .json({
@@ -84,14 +84,14 @@ export const refreshToken = catchAsync(async (req: Request, res: Response) => {
   res
     .cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: ENV.NODE_ENV === "production",
+      sameSite: ENV.NODE_ENV === "production" ? "strict" : "lax",
       maxAge: 1000 * 60 * 5, // 5m
     })
     .cookie("refreshToken", newRefresh, {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: ENV.NODE_ENV === "production",
+      sameSite: ENV.NODE_ENV === "production" ? "strict" : "lax",
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7d
     })
     .json({
@@ -112,13 +112,13 @@ export const logout = catchAsync(async (req: AuthRequest, res: Response) => {
   // Clear cookies
   res.clearCookie("accessToken", {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    secure: ENV.NODE_ENV === "production",
+    sameSite: ENV.NODE_ENV === "production" ? "strict" : "lax",
   });
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    secure: ENV.NODE_ENV === "production",
+    sameSite: ENV.NODE_ENV === "production" ? "strict" : "lax",
   });
 
   res.json({
