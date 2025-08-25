@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import routes from "./routes";
 import ErrorMiddleware from "./middlewares/error.middleware";
-import { ENV } from "./config/env";
+// import { ENV } from "./config/env";
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -10,8 +10,8 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    // origin: "http://localhost:3000", // frontend URL
-    origin: "*", // frontend URL
+    origin: "http://localhost:3000", // frontend URL
+    // origin: "*", // frontend URL
     credentials: true, // allow cookies
   })
 );
