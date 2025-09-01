@@ -9,6 +9,7 @@ interface SignupInput {
   password: string;
   fullName: string;
   role?: UserRole;
+  createdById?: string;
 }
 interface LoginInput {
   email: string;
@@ -20,6 +21,7 @@ export const signupService = async ({
   password,
   fullName,
   role,
+  createdById,
 }: SignupInput) => {
   // Check if user already exists
   const exists = await prisma.user.findUnique({ where: { email } });
@@ -32,7 +34,13 @@ export const signupService = async ({
 
   // Create user
   const user = await prisma.user.create({
-    data: { email, passwordHash, fullName, role: role ?? "PARTICIPANT" },
+    data: {
+      email,
+      passwordHash,
+      fullName,
+      role: role ?? "PARTICIPANT",
+      createdById: createdById ?? null,
+    },
   });
 
   return user;

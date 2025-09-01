@@ -8,6 +8,7 @@ import {
   deleteUserService,
   getAllUsersService,
   getMeService,
+  getUsersByCreatorService,
   updatePasswordService,
   updateProfilePicService,
   updateUserInfoService,
@@ -43,6 +44,33 @@ export const getAllUsers = catchAsync(
     const limitNum = parseInt(limit as string, 10) || 10;
 
     const result = await getAllUsersService(
+      pageNum,
+      limitNum,
+      search as string
+    );
+
+    res.json({
+      success: true,
+      ...result, // includes users, totalUsers, totalPages, currentPage
+    });
+  }
+);
+
+// get all users created by organizer
+export const getUsersByCreator = catchAsync(
+  async (req: AuthRequest, res: Response) => {
+    const { page = "1", limit = "10", search } = req.query;
+    const userId = req.user;
+
+    if (!userId) {
+      throw new ErrorHandler("Unauthorized", 401);
+    }
+
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = parseInt(limit as string, 10) || 10;
+
+    const result = await getUsersByCreatorService(
+      userId,
       pageNum,
       limitNum,
       search as string

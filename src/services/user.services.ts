@@ -43,11 +43,52 @@ export const getAllUsersService = async (
   };
 };
 
+// get all users created by organizer service
+export const getUsersByCreatorService = async (
+  creatorId: string,
+  page: number,
+  limit: number,
+  search?: string
+) => {
+  const skip = (page - 1) * limit;
+
+  const whereCondition: any = {
+    createdById: creatorId, // only fetch users created by this organizer
+  };
+
+  if (search) {
+    whereCondition.OR = [
+      { fullName: { contains: search, mode: "insensitive" as const } },
+      { email: { contains: search, mode: "insensitive" as const } },
+    ];
+  }
+
+  const [users, totalUsers] = await Promise.all([
+    prisma.user.findMany({
+      where: whereCondition,
+      select: { id: true, email: true, fullName: true, role: true },
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.user.count({ where: whereCondition }),
+  ]);
+
+  const totalPages = Math.ceil(totalUsers / limit);
+
+  return {
+    users,
+    totalUsers,
+    totalPages,
+    currentPage: page,
+  };
+};
+
 //  Get current user info
 export const getMeService = async (userId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, fullName: true, role: true, profilePic: true },
+    select: { id: true, email: true, phone: true, fullName: true, role: true, profilePic: true },
   });
 
   if (!user) {
@@ -72,6 +113,7 @@ export const updateUserInfoService = async (
       fullName: true,
       phone: true,
       role: true,
+      profilePic: true,
     },
   });
 

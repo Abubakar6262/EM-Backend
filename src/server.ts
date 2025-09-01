@@ -2,15 +2,16 @@ import express from "express";
 import cors from "cors";
 import routes from "./routes";
 import ErrorMiddleware from "./middlewares/error.middleware";
-// import { ENV } from "./config/env";
+import { ENV } from "./config/env";
 import cookieParser from "cookie-parser";
+import { setupSwagger } from "./config/swagger";
 
 const app = express();
 
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend URL
+    origin: ENV.FRONTEND_URL || "http://localhost:3000", // frontend URL
     // origin: "*", // frontend URL
     credentials: true, // allow cookies
   })
@@ -34,5 +35,7 @@ app.use(ErrorMiddleware);
 // app.listen(ENV.PORT, () => {
 //   console.log(` Server running at http://localhost:${ENV.PORT}`);
 // });
+
+setupSwagger(app);
 
 export default app;
