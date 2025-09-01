@@ -13,8 +13,10 @@ import {
   getAllEventsService,
   getEventByIdService,
   getMyEventsService,
+  getOrganizerDashboardService,
   updateEventByIdService,
 } from "../services/event.service";
+import { EventType } from "@prisma/client";
 
 export const createEvent = catchAsync(
   async (req: AuthRequest, res: Response) => {
@@ -55,16 +57,23 @@ export const createEvent = catchAsync(
 );
 
 export const getAllEvents = catchAsync(async (req: Request, res: Response) => {
-  const { page = "1", limit = "10", filterBy, search } = req.query;
+  const { page = "1", limit = "10", filterBy, search, type } = req.query;
 
   const pageNum = parseInt(page as string, 10) || 1;
   const limitNum = parseInt(limit as string, 10) || 10;
+
+  // Validate type if provided
+  let eventType: EventType | undefined;
+  if (type && (type === EventType.ONLINE || type === EventType.ONSITE)) {
+    eventType = type as EventType;
+  }
 
   const { events, total } = await getAllEventsService(
     pageNum,
     limitNum,
     filterBy as string,
-    search as string
+    search as string,
+    eventType
   );
 
   if (!events || events.length === 0) {
@@ -173,17 +182,22 @@ export const getMyEvents = catchAsync(
       throw new ErrorHandler("Unauthorized", 401);
     }
 
-    const { page = "1", limit = "10", filterBy, search } = req.query;
+    const { page = "1", limit = "10", filterBy, search, type } = req.query;
 
     const pageNum = parseInt(page as string, 10) || 1;
     const limitNum = parseInt(limit as string, 10) || 10;
+    let eventType: EventType | undefined;
+    if (type && (type === EventType.ONLINE || type === EventType.ONSITE)) {
+      eventType = type as EventType;
+    }
 
     const { events, total } = await getMyEventsService(
       userId,
       pageNum,
       limitNum,
       filterBy as string,
-      search as string
+      search as string,
+      eventType
     );
 
     if (!events || events.length === 0) {
@@ -226,6 +240,21 @@ export const deleteAttachmentById = catchAsync(
     res.status(200).json({
       success: true,
       message: "Attachment deleted successfully",
+    });
+  }
+);
+
+export const getOrganizerDashboard = catchAsync(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user;
+    if (!userId) throw new ErrorHandler("Unauthorized", 401);
+
+    const data = await getOrganizerDashboardService(userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Dashboard analytics fetched successfully",
+      data,
     });
   }
 );

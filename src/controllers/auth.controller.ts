@@ -18,6 +18,7 @@ import {
   verifyResetService,
 } from "../services/auth.services";
 import { issueResetToken } from "../utils/jwt";
+import { generateStrongPassword } from "../utils/generateStrongPassword ";
 // import { string } from "zod";
 
 export const signup = catchAsync(async (req: Request, res: Response) => {
@@ -37,6 +38,39 @@ export const signup = catchAsync(async (req: Request, res: Response) => {
     message: "Account created. Please log in.",
   });
 });
+
+export const createUserByOrganizer = catchAsync(
+  async (req: AuthRequest, res: Response) => {
+    const organizerId = req.user;
+    const parsed = signupSchema
+      .pick({ email: true, fullName: true, role: true })
+      .parse(req.body);
+    const { email, fullName, role } = parsed;
+
+    // Gen auto strong password
+    const generatedPassword = await generateStrongPassword();
+
+    const user = await signupService({
+      email,
+      password: generatedPassword,
+      fullName,
+      role,
+      createdById: organizerId,
+    });
+
+    // sending pasword to user via email
+    await sendEmail({
+      to: email,
+      subject: "Your Event Management Account",
+      text: `Hello ${fullName},\n\nYour account has been created by the organizer.\n\nEmail: ${email}\nPassword: ${generatedPassword}\n\nPlease log in and change your password.\n\nBest regards,\nEvent Management Team`,
+    });
+    res.status(201).json({
+      success: true,
+      message: "User created Successfully",
+      data: user,
+    });
+  }
+);
 
 export const login = catchAsync(async (req: Request, res: Response) => {
   // Validate input

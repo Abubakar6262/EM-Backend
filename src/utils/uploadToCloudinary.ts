@@ -46,4 +46,8 @@ const fileFilter: multer.Options["fileFilter"] = (req, file, cb) => {
   cb(null, true);
 };
 
-export const upload = multer({ storage, fileFilter });
+export const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB per file
+});

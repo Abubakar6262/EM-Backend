@@ -252,6 +252,9 @@ export const getMyParticipantsService = async (
             description: true,
             startAt: true,
             endAt: true,
+            type: true,
+            joinLink: true,
+            venue: true,
           },
         },
       },
@@ -314,3 +317,4 @@ export const getParticipantsForOrganizerService = async (
     currentPage: page,
   };
 };
+
