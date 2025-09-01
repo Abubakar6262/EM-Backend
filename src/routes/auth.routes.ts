@@ -149,7 +149,7 @@ router.get("/refresh", AuthController.refreshToken);
  *       200:
  *         description: Logout successful
  */
-router.get("/logout", isAuthenticated, AuthController.logout);
+router.post("/logout", isAuthenticated, AuthController.logout);
 
 /**
  * @swagger
