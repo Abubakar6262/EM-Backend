@@ -203,3 +203,4 @@ router.post("/forgot-password", AuthController.forgotPassword);
 router.post("/verify-reset", AuthController.verifyReset);
 
 export default router;
+
