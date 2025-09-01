@@ -15,14 +15,7 @@ export async function issueTokens(userId: string) {
   // compute refresh expiry date
   const decoded = jwt.decode(refreshToken) as { exp: number };
   const refreshExp = new Date(decoded.exp * 1000);
-  // Save in DB
-  await prisma.refreshToken.create({
-    data: {
-      userId,
-      token: refreshToken, // store raw JWT
-      expiresAt: refreshExp,
-    },
-  });
+ 
 
   return { accessToken, refreshToken, refreshExp };
 }
