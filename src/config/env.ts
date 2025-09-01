@@ -11,7 +11,7 @@ function getEnv(name: string, fallback?: string): string {
 }
 
 export const ENV = {
-  NODE_ENV: getEnv("NODE_ENV", "development"),
+  NODE_ENV: getEnv("NODE_ENV"),
   PORT: parseInt(getEnv("PORT", "5000"), 10),
 
   // Frontend
