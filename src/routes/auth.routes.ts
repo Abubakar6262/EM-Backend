@@ -135,7 +135,7 @@ router.post("/login", AuthController.login);
  *       200:
  *         description: Token refreshed successfully
  */
-router.get("/refresh", AuthController.refreshToken);
+router.post("/refresh", AuthController.refreshToken);
 
 /**
  * @swagger
