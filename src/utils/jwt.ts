@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import { ENV } from "../config/env";
 import { JwtPayload } from "../types/jwt";
-import { prisma } from "../services/prisma";
-
 export async function issueTokens(userId: string) {
   const accessToken = jwt.sign({ sub: userId }, ENV.ACCESS_SECRET, {
     expiresIn: ENV.ACCESS_EXPIRES,

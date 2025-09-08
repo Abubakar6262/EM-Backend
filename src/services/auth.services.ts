@@ -76,6 +76,8 @@ export const loginService = async ({ email, password }: LoginInput) => {
       email: user.email,
       fullName: user.fullName,
       role: user.role,
+      phone: user.phone,
+      profilePic: user.profilePic,
     },
   };
 };
